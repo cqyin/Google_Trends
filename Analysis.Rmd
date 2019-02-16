@@ -1,0 +1,78 @@
+---
+title: "G-Trends Analysis"
+author: "Chaoqun Yin"
+date: "2/16/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+```
+
+## Prepare the data
+```{r}
+gm <- read_csv("Data/geoMap.csv", skip = 2)
+colnames(gm) <- c("Region", "GB", "GG")
+gm$GB <- as.numeric(gm$GB)
+gm$GG <- as.numeric(gm$GG)
+```
+
+## Q1: Which are the states where GG is smaller than 1? Find those and replace them with zero.
+```{r}
+gm <- replace(gm, is.na(gm), 0)
+gm$Region[which(gm$GG == 0)]
+```
+
+
+## Q2: For How Many States GB > GG?
+```{r}
+attach(gm)
+n = 0
+for (i in 1:length(Region)){
+  if (GB[i] > GG[i]){
+    n = n + 1
+  }
+}
+print(n)
+```
+
+## Q3: Find any states where GG+10 > GB
+```{r}
+n = 0
+for (i in 1:length(gm$Region)){
+  if (gm$GB[i] < as.numeric(gm$GG[i]) + 10){
+    n = n + 1
+    print(gm$Region[i])
+  }
+}
+```
+
+## Q4: What is the % of states for which GG+10 > GB?
+```{r}
+n = 0
+for (i in 1:length(gm$Region)){
+  if (gm$GB[i] < as.numeric(gm$GG[i]) + 10){
+    n = n + 1
+  }
+}
+cat((n/length(gm$Region))*100, "%")
+```
+
+## Q5: What is the ratio GG/GB for the state of New Hampshire? 
+```{r}
+i = length(which(gm$Region == "New Hampshire"))
+print(gm$GG[i]/gm$GB[i])
+```
+
+## Q6: Create a Bar Plot of GG & GB values for each state.
+```{r}
+library(ggplot2)
+library(reshape2)
+gm_bar <- melt(gm, id.vars = "Region")
+head(gm_bar)
+
+ggplot(gm_bar, aes(x = Region, y = value, fill = variable)) +
+  geom_bar(stat='identity', position='dodge') + coord_flip()
+```
+
